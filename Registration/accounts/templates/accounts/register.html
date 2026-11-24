@@ -1,0 +1,96 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="split">
+  <aside class="intro">
+    <h1>Create your monitoring account</h1>
+    <p class="lead">Register to submit hauler reports, manage landfill profiles, and follow waste disposal records for your facility.</p>
+
+    <ul class="feature-list">
+      <li>
+        <span class="feature-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 21h14M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0L5 7ZM19 7l-3 7a3.5 3.5 0 0 0 6 0l-3-7Z"/></svg></span>
+        <div><strong>Disposal tracking</strong><span>Waste volumes recorded in metric tons per cell.</span></div>
+      </li>
+      <li>
+        <span class="feature-icon blue"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+        <div><strong>Hauler registry</strong><span>Register haulers and vehicles under one account.</span></div>
+      </li>
+      <li>
+        <span class="feature-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <div><strong>Landfill capacity</strong><span>See operational cells and remaining capacity.</span></div>
+      </li>
+    </ul>
+  </aside>
+
+  <section class="card" aria-labelledby="reg-title">
+    <h2 id="reg-title">Sign up</h2>
+    <p class="muted">Use your official email address.</p>
+
+    {% if email_taken %}
+    <div class="alert alert-info" role="alert">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+      <div>
+        <p>This email is already registered. Try logging in instead.</p>
+        <a class="alert-link" href="{% url 'login' %}">Go to log in</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <form id="register-form" method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="field">
+        <label for="id_email">Email address</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          {{ form.email }}
+        </div>
+        <p class="err" id="email-err" aria-live="polite">{{ form.email.errors.0 }}</p>
+      </div>
+
+      <div class="field">
+        <label for="id_password">Password</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          {{ form.password }}
+          <button type="button" class="eye" id="toggle-pw" aria-label="Show password">
+            <svg class="i eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="i eye-hide" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M17.9 17.9A10.6 10.6 0 0 1 12 19c-6.4 0-10-7-10-7a17.8 17.8 0 0 1 4.1-5M9.9 5.2A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a17.7 17.7 0 0 1-2.2 3.2M1 1l22 22M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
+        <p class="warn" id="caps" hidden>Caps Lock is on.</p>
+        <p class="err" id="password-err" aria-live="polite">{{ form.password.errors.0 }}</p>
+
+        <div class="strength" id="strength" aria-live="polite" hidden>
+          <div class="bars"><i></i><i></i><i></i><i></i></div>
+          <span id="strength-label"></span>
+        </div>
+        <ul class="rules" id="rules">
+          <li data-rule="len"><span class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>At least 8 characters</li>
+          <li data-rule="up"><span class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>One uppercase letter</li>
+          <li data-rule="low"><span class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>One lowercase letter</li>
+          <li data-rule="num"><span class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>One number</li>
+        </ul>
+      </div>
+
+      <div class="field">
+        <label for="id_confirm">Confirm password</label>
+        <div class="input">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          {{ form.confirm }}
+        </div>
+        <p class="err" id="confirm-err" aria-live="polite">{{ form.confirm.errors.0 }}</p>
+      </div>
+
+      <button id="submit" class="btn" type="submit">Create account</button>
+    </form>
+
+    <p class="switch">Already registered? <a href="{% url 'login' %}">Log in</a></p>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'accounts/register.js' %}"></script>
+{% endblock %}
