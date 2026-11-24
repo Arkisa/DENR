@@ -15,9 +15,16 @@ Built with Django and PostgreSQL. School/OJT project.
 - Accounts saved to PostgreSQL, with passwords stored hashed (PBKDF2)
 - Custom Django user model: email login, `is_verified`, `is_active`, `is_staff`, `created_at`
 - Case-insensitive unique emails (`Test@x.com` and `test@x.com` count as the same)
-- Success page after registration
+- **Email verification**: single-use token link that expires after 24 hours, a confirm page, and a resend option with a 60-second cooldown
 - Responsive layout (desktop, tablet, phone)
 - Django admin set up to view and manage users
+
+## How email verification works
+
+1. After sign-up, the account is created with `is_verified = False` and a random token (valid for 24 hours) is emailed as a link: `/verify/<token>/`.
+2. Opening the link shows a **Verify my email** button. Verifying only happens when the button is clicked, so email scanners that pre-open links can't use up the token.
+3. Clicking the button sets `is_verified = True` and deletes the token, so the link works only once.
+4. Expired links show a **Send a new link** button. Resending replaces older links, so only the newest one works.
 
 ## Password rules
 
@@ -61,12 +68,13 @@ Registration/
 ├── manage.py
 ├── config/            # Django project settings and root URLs
 └── accounts/          # Registration app
-    ├── models.py      # Custom User model
+    ├── models.py      # Custom User model + EmailVerificationToken
     ├── forms.py       # RegisterForm and server-side validation
-    ├── views.py       # register, registered, login placeholder
+    ├── views.py       # register, registered, verify, resend, login placeholder
+    ├── emails.py      # builds the token and sends the verification email
     ├── urls.py
     ├── admin.py
-    ├── templates/accounts/   # base, register, registered, login
+    ├── templates/accounts/   # base, register, registered, verify, login
     └── static/accounts/      # style.css, register.js, logo.svg
 ```
 
@@ -95,6 +103,7 @@ Registration/
    DB_PASSWORD=your_postgres_password
    DB_HOST=localhost
    DB_PORT=5432
+   EMAIL_MODE=console
    ```
 
    `.env` is in `.gitignore`. Never commit it.
@@ -115,17 +124,40 @@ Registration/
    - Sign-up page: http://127.0.0.1:8000/
    - Admin: http://127.0.0.1:8000/admin/
 
+`.env` is only read when the server starts, so restart `runserver` after changing it.
+
+## Email modes
+
+Set `EMAIL_MODE` in `.env`:
+
+| Mode | What happens | Use for |
+|---|---|---|
+| `console` (default) | The verification email is printed in the `runserver` terminal. Copy the link from there. | Development and testing |
+| `smtp` | The email is really sent through an SMTP server (set up for Gmail by default). | Real delivery |
+
+For `smtp` mode, add these to `.env` (Gmail needs 2-Step Verification and an [app password](https://myaccount.google.com/apppasswords), not your normal password):
+
+```
+EMAIL_MODE=smtp
+EMAIL_HOST_USER=yourgmail@gmail.com
+EMAIL_HOST_PASSWORD=your_16_character_app_password
+DEFAULT_FROM_EMAIL=yourgmail@gmail.com
+```
+
+The link in the email points to the address the site is served from. During local development that is `127.0.0.1`, so it only opens on the same computer.
+
 ## Notes
 
 - The login page is a placeholder for now.
 - Django's users table is `accounts_user` (not `users`).
-- Verification emails are not sent yet, so new accounts stay unverified.
+- Accounts created with `createsuperuser` are verified automatically.
+- Use an incognito window for test sign-ups to avoid CSRF cookie clashes with the admin login.
 
 ## Next steps
 
-- Email verification: token link with 24-hour expiry, verify page, resend option
-- Real login page and sessions
+- Real login page and sessions (block unverified accounts)
 - Deployment setup (gunicorn, whitenoise, environment variables for secrets, secure cookies)
 - Move `SECRET_KEY` into `.env` before deploying
+- Real email service for production instead of a personal Gmail
 - Agree on one password policy with the group
 - Add a `requirements.txt` and a `.env.example`
