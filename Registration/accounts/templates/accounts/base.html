@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Register{% endblock %} | DENR-EMB Sanitary Landfill Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <img class="seal" src="{% static 'accounts/logo.svg' %}" alt="Logo placeholder" width="46" height="46">
+      <div>
+        <p class="topbar-country">Republic of the Philippines</p>
+        <p class="topbar-title">DENR-EMB Sanitary Landfill Monitoring System</p>
+      </div>
+    </header>
+    <main class="stage">{% block content %}{% endblock %}</main>
+    <footer class="footer">Department of Environment and Natural Resources · Environmental Management Bureau</footer>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
